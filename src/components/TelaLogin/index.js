@@ -3,6 +3,7 @@ import {Alert} from 'react-native';
 
 import auth from '@react-native-firebase/auth';
 import messaging from '@react-native-firebase/messaging';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import VerifyCode from './VerifyCode';
 import InsertNumberTel from './InsertNumberTel';
@@ -134,11 +135,20 @@ const Login = () => {
       }, 300);
       return;
     }
-    const response = await loginSuccess({numberTel, tokenFCM});
+    try {
+      const response = await loginSuccess({numberTel, tokenFCM});
+      console.log(response);
+      await AsyncStorage.multiSet([
+        ['@cliente', JSON.stringify(response.cliente)],
+        ['@id_install', JSON.stringify(response.id_install)],
+        ['@enderecos', JSON.stringify(response.addresses)],
+      ]);
 
-    store.dispatch(clientRegistered(response.cliente));
-
-    console.log(response);
+      store.dispatch(clientRegistered(response.cliente));
+    } catch (e) {
+      Alert('', 'Ocorreu um erro. Tente novamente.');
+      console.error(e);
+    }
   }
 
   function loginError(e) {

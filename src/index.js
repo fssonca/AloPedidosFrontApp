@@ -21,16 +21,17 @@ function LogoTitle({title}) {
 }
 
 let screen;
-function Routes({state}) {
+function Routes({stateRedux}) {
   const [load, setLoad] = React.useState(false);
 
-  const {cliente} = state; // provided by redux
+  const {cliente} = stateRedux;
 
   React.useEffect(() => {
     AsyncStorage.getItem('@cliente')
       .then((cliente) => {
         console.log('cliente', cliente);
-        store.dispatch(clientRegistered(cliente));
+
+        store.dispatch(clientRegistered(JSON.parse(cliente)));
         setLoad(true);
       })
       .catch((err) => {
@@ -85,7 +86,7 @@ function Routes({state}) {
 }
 
 const mapStateToProps = ({state}) => {
-  return {state};
+  return {stateRedux: state};
 };
 
 export default connect(mapStateToProps)(Routes);

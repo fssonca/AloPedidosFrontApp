@@ -152,7 +152,6 @@ android {
             keyAlias 'alias_name'
             keyPassword '45jxuazbnc5e'
         }
-		 
     }
     buildTypes {
         debug {

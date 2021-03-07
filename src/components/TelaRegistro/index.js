@@ -12,11 +12,17 @@ import {
   Image,
   Linking,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import {connect} from 'react-redux';
+import store from '../../redux/store';
+import {clientRegistered} from '../../redux/actions';
 
 import CampoNascimento from './CampoNascimento';
 import {tela} from '../../utils/general/tela';
+import {ajax} from '../../utils/general/ajax';
 
-function TelaRegistro() {
+function TelaRegistro({stateRedux}) {
   const [loading, setLoading] = useState(false);
   const [nome, setNome] = useState('');
   const [sobrenome, setSobrenome] = useState('');
@@ -29,20 +35,20 @@ function TelaRegistro() {
     ano: null,
   });
 
+  const {cliente} = stateRedux;
+
   function alterarNascimento(date, value) {
     const nasc = Object.assign(nascimento, {});
-
     if (date !== 'mes') {
       nasc[date] = value;
     } else {
       nasc.mesNome = value.mesNome;
       nasc.mesValor = value.mesValor;
     }
-
     setNascimento(nasc);
   }
 
-  function registrar() {
+  async function registrar() {
     console.log(nome, sobrenome, sexo);
     console.log(nascimento);
 
@@ -74,6 +80,33 @@ function TelaRegistro() {
     }
 
     setLoading(true);
+
+    try {
+      const info = {
+        clienteID: cliente.id,
+        nome,
+        sobrenome,
+        sexo,
+        nascimento,
+      };
+
+      console.log(info);
+
+      const response = await ajax.POST('registrarCliente', info);
+
+      if (response.ok) {
+        await AsyncStorage.setItem(
+          '@cliente',
+          JSON.stringify(response.cliente),
+        );
+        store.dispatch(clientRegistered(response.cliente));
+      }
+
+      setLoading(false);
+    } catch (e) {
+      setLoading(false);
+      console.log(e);
+    }
   }
 
   return (
@@ -279,4 +312,8 @@ function TelaRegistro() {
   );
 }
 
-export default TelaRegistro;
+const mapStateToProps = ({state}) => {
+  return {stateRedux: state};
+};
+
+export default connect(mapStateToProps)(TelaRegistro);

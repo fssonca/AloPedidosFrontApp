@@ -1,6 +1,5 @@
 import DeviceInfo from 'react-native-device-info';
 import {ajax} from '../general/ajax';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export async function loginSuccess(params) {
   const {numberTel, tokenFCM} = params;
@@ -27,12 +26,6 @@ export async function loginSuccess(params) {
 
   try {
     const response = await ajax.POST('loginUser', dados);
-    await AsyncStorage.multiSet([
-      ['@cliente', JSON.stringify(response.cliente)],
-      ['@id_install', JSON.stringify(response.id_install)],
-      ['@enderecos', JSON.stringify(response.addresses)],
-    ]);
-
     return response;
   } catch (e) {
     console.error(e);
